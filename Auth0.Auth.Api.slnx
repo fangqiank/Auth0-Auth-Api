@@ -1,0 +1,6 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="docker-compose.yml" />
+  </Folder>
+  <Project Path="Auth0.Auth.Api/Auth0.Auth.Api.csproj" />
+</Solution>

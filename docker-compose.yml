@@ -1,0 +1,47 @@
+services:
+  auth0.auth.api:
+    image: ${DOCKER_REGISTRY-}auth0authapi
+    container_name: auth0-api
+    build:
+      context: .
+      dockerfile: Auth0.Auth.Api/Dockerfile
+    ports:
+      - "5000:8080"
+    environment:
+      # OpenTelemetry
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://aspire-dashboard:18889
+      
+      # Auth0 配置
+      - Authentication__Domain=${AUTH0_DOMAIN}
+      - Authentication__Audience=${AUTH0_AUDIENCE}
+      - Authentication__ClientId=${AUTH0_CLIENT_ID}
+      - Authentication__ClientSecret=${AUTH0_CLIENT_SECRET}
+      - Authentication__AuthorizationUrl=https://${AUTH0_DOMAIN}/authorize
+      - Authentication__TokenUrl=https://${AUTH0_DOMAIN}/oauth/token
+      - Authentication__MetadataAddress=https://${AUTH0_DOMAIN}/.well-known/openid-configuration
+      - Authentication__ValidIssuer=https://${AUTH0_DOMAIN}/
+      
+      # ASP.NET Core
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+    depends_on:
+      - aspire-dashboard
+    networks:
+      - aspire-network
+    restart: unless-stopped
+
+  aspire-dashboard:
+    container_name: aspire-dashboard
+    image: mcr.microsoft.com/dotnet/aspire-dashboard:13
+    ports:
+      - "18888:18888"  # Dashboard UI
+      - "18889:18889"  # OTLP gRPC endpoint
+    environment:
+      - DOTNET_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS=false
+    networks:
+      - aspire-network
+    restart: unless-stopped
+
+networks:
+  aspire-network:
+    driver: bridge
