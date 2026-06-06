@@ -11,7 +11,7 @@ A .NET 10 Minimal API demonstrating Auth0 JWT authentication with scope/permissi
 |------|------|
 | .NET 10 Minimal API | Web 框架 |
 | JWT Bearer (Auth0) | 认证与授权 |
-| Scalar | API 文档 UI（替代 Swagger） |
+| Scalar | API 文档 UI |
 | OpenTelemetry | 分布式追踪与指标 |
 | Aspire Dashboard | 遥测可视化 |
 | Docker / Docker Compose | 容器化部署 |
@@ -19,24 +19,23 @@ A .NET 10 Minimal API demonstrating Auth0 JWT authentication with scope/permissi
 ## Architecture
 
 ```
-Request → ExceptionHandling → Authentication(JWT) → Authorization(Scope) → Endpoint
-                                                                       ↓
-                                                              In-Memory Data Store
-                                                                       ↓
-                                                         OpenTelemetry → Aspire Dashboard
+Request → ExceptionHandling → Authentication(JWT) → Authorization(Scope/Permission) → Endpoint
+                                                                                          ↓
+                                                                    ConcurrentDictionary<int, DataItem>
+                                                                                          ↓
+                                                                   OpenTelemetry → Aspire Dashboard
 ```
 
 ### Project Structure
 
 | 模块 | 职责 |
 |------|------|
-| `Program.cs` | 应用入口，DI 注册，中间件配置 |
+| `Program.cs` | 应用入口，DI 注册，中间件管道，启动配置验证 |
 | `Endpoints/HealthEndpoints.cs` | 公开健康检查端点 |
-| `Endpoints/UserEndpoints.cs` | 认证用户信息端点 |
-| `Endpoints/DataEndpoints.cs` | 基于 scope 的 CRUD 数据端点 |
-| `Extensions/ClaimsPrincipalExtensions.cs` | Auth0 scope claim 解析扩展 |
-| `Middleware/ExceptionHandlingMiddleware.cs` | 全局异常处理 |
-| `Models/Auth0Options.cs` | Auth0 配置模型 |
+| `Endpoints/UserEndpoints.cs` | 认证用户信息端点（过滤敏感 Claims） |
+| `Endpoints/DataEndpoints.cs` | 基于 scope/permission 的 CRUD 端点，线程安全数据存储 |
+| `Extensions/ClaimsPrincipalExtensions.cs` | `HasScope()` / `HasPermission()` Auth0 claim 解析 |
+| `Middleware/ExceptionHandlingMiddleware.cs` | 全局异常处理（生产环境隐藏详情） |
 
 ## Quick Start
 
@@ -83,14 +82,14 @@ docker-compose up --build
 
 ## API Endpoints
 
-| Method | Path | Auth | Scope | Description |
-|--------|------|------|-------|-------------|
+| Method | Path | Auth | Scope / Permission | Description |
+|--------|------|------|---------------------|-------------|
 | `GET` | `/api/health` | None | — | 健康检查 |
-| `GET` | `/api/users/me` | JWT | — | 当前用户信息与 Claims |
-| `GET` | `/api/users/claims` | JWT | — | 按 Claim 类型分组 |
-| `GET` | `/api/data/` | JWT | `read:data` | 读取所有数据 |
-| `POST` | `/api/data/` | JWT | `write:data` | 写入新数据 |
-| `DELETE` | `/api/data/purge` | JWT | `admin` | 清除所有数据 |
+| `GET` | `/api/users/me` | JWT | — | 当前用户信息 |
+| `GET` | `/api/users/claims` | JWT | — | 用户 Claims（过滤敏感信息） |
+| `GET` | `/api/data/` | JWT | `read:data` scope | 读取所有数据 |
+| `POST` | `/api/data/` | JWT | `write:data` scope | 写入新数据 |
+| `DELETE` | `/api/data/purge` | JWT | `admin` permission | 清除所有数据 |
 
 ## Example
 

@@ -17,6 +17,21 @@ if (string.IsNullOrEmpty(auth0Domain))
     throw new InvalidOperationException(
         "Auth0 Domain is not configured. Please set the 'Authentication:Domain' configuration value.");
 
+// 验证必需配置
+var requiredConfigs = new Dictionary<string, string>
+{
+    ["Authentication:Audience"] = "Auth0 API Audience",
+    ["Authentication:ClientId"] = "Auth0 Client ID",
+    ["Authentication:ClientSecret"] = "Auth0 Client Secret",
+    ["Authentication:MetadataAddress"] = "Auth0 OIDC Metadata Address",
+    ["Authentication:ValidIssuer"] = "Auth0 Valid Issuer"
+};
+foreach (var (key, label) in requiredConfigs)
+{
+    if (string.IsNullOrEmpty(builder.Configuration[key]))
+        throw new InvalidOperationException($"{label} is not configured. Please set the '{key}' configuration value.");
+}
+
 // 原生 OpenAPI + Scalar
 builder.Services.AddOpenApi(options =>
 {
@@ -103,14 +118,14 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 // 授权
 builder.Services.AddAuthorizationBuilder()
     .AddPolicy("read:data", policy =>
-        policy.RequireClaim("scope", "read:data")
-              .RequireAuthenticatedUser())
+        policy.RequireAuthenticatedUser()
+              .RequireAssertion(ctx => ctx.User.HasScope("read:data")))
     .AddPolicy("write:data", policy =>
-        policy.RequireClaim("scope", "write:data")
-              .RequireAuthenticatedUser())
+        policy.RequireAuthenticatedUser()
+              .RequireAssertion(ctx => ctx.User.HasScope("write:data")))
     .AddPolicy("admin", policy =>
-        policy.RequireClaim("permissions", "admin")
-              .RequireAuthenticatedUser());
+        policy.RequireAuthenticatedUser()
+              .RequireAssertion(ctx => ctx.User.HasPermission("admin")));
 
 // OpenTelemetry 可观测性
 builder.Services

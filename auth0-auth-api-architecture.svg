@@ -1,109 +1,119 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 720" font-family="Segoe UI, Arial, sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 750" font-family="Segoe UI, Arial, sans-serif">
   <defs>
     <marker id="arrow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#64748b"/></marker>
-    <marker id="arrow-blue" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#3b82f6"/></marker>
     <filter id="shadow" x="-2%" y="-2%" width="104%" height="104%"><feDropShadow dx="1" dy="2" stdDeviation="3" flood-opacity="0.1"/></filter>
+    <linearGradient id="headerGrad" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#3b82f6"/><stop offset="100%" stop-color="#8b5cf6"/></linearGradient>
   </defs>
 
   <!-- Title -->
-  <text x="450" y="32" text-anchor="middle" font-size="20" font-weight="700" fill="#1e293b">Auth0 Auth API — Architecture</text>
-  <text x="450" y="52" text-anchor="middle" font-size="12" fill="#94a3b8">.NET 10 Minimal API · JWT Authentication · OpenTelemetry</text>
+  <rect x="0" y="0" width="920" height="56" fill="url(#headerGrad)" rx="0"/>
+  <text x="460" y="28" text-anchor="middle" font-size="18" font-weight="700" fill="#ffffff">Auth0 Auth API — Architecture</text>
+  <text x="460" y="46" text-anchor="middle" font-size="11" fill="#e0e7ff">.NET 10 Minimal API · JWT Authentication · OpenTelemetry · Scalar</text>
 
   <!-- ===== Client ===== -->
-  <rect x="340" y="70" width="220" height="46" rx="8" fill="#f1f5f9" stroke="#cbd5e1" filter="url(#shadow)"/>
-  <text x="450" y="97" text-anchor="middle" font-size="14" font-weight="600" fill="#334155">Client (Browser / curl / Postman)</text>
+  <rect x="350" y="74" width="220" height="44" rx="8" fill="#f1f5f9" stroke="#cbd5e1" filter="url(#shadow)"/>
+  <text x="460" y="100" text-anchor="middle" font-size="13" font-weight="600" fill="#334155">Client (Browser / curl / Postman)</text>
 
   <!-- Arrow: Client → Docker -->
-  <line x1="450" y1="116" x2="450" y2="150" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
-  <text x="462" y="138" font-size="10" fill="#94a3b8">HTTP :5000</text>
+  <line x1="460" y1="118" x2="460" y2="148" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="475" y="136" font-size="9" fill="#94a3b8">HTTP :5000</text>
 
   <!-- ===== Docker Container ===== -->
-  <rect x="140" y="150" width="620" height="390" rx="12" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5" stroke-dasharray="6,3" filter="url(#shadow)"/>
-  <text x="160" y="172" font-size="12" font-weight="600" fill="#3b82f6">Docker Container (auth0-api)</text>
+  <rect x="120" y="148" width="680" height="400" rx="12" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5" stroke-dasharray="6,3" filter="url(#shadow)"/>
+  <text x="140" y="170" font-size="12" font-weight="600" fill="#3b82f6">Docker Container (auth0-api · .NET 10 · Port 8080)</text>
 
   <!-- Middleware Stack -->
-  <rect x="180" y="186" width="540" height="170" rx="8" fill="#ffffff" stroke="#e2e8f0" filter="url(#shadow)"/>
-  <text x="200" y="208" font-size="11" font-weight="600" fill="#475569">Middleware Pipeline</text>
+  <rect x="150" y="182" width="620" height="155" rx="8" fill="#ffffff" stroke="#e2e8f0" filter="url(#shadow)"/>
+  <text x="170" y="202" font-size="11" font-weight="600" fill="#475569">Middleware Pipeline</text>
 
-  <!-- ExceptionHandling -->
-  <rect x="200" y="216" width="500" height="28" rx="4" fill="#fef2f2" stroke="#fca5a5"/>
-  <text x="450" y="234" text-anchor="middle" font-size="11" fill="#991b1b">① ExceptionHandlingMiddleware</text>
+  <rect x="170" y="210" width="580" height="26" rx="4" fill="#fef2f2" stroke="#fca5a5"/>
+  <text x="460" y="227" text-anchor="middle" font-size="10" fill="#991b1b">① ExceptionHandlingMiddleware（生产环境隐藏异常详情）</text>
 
-  <!-- OpenAPI / Scalar -->
-  <rect x="200" y="250" width="500" height="28" rx="4" fill="#f0fdf4" stroke="#86efac"/>
-  <text x="450" y="268" text-anchor="middle" font-size="11" fill="#166534">② OpenAPI (/openapi/v1.json) + Scalar UI (/scalar/v1)  [Dev Only]</text>
+  <rect x="170" y="242" width="580" height="26" rx="4" fill="#f0fdf4" stroke="#86efac"/>
+  <text x="460" y="259" text-anchor="middle" font-size="10" fill="#166534">② OpenAPI (/openapi/v1.json) + Scalar UI (/scalar/v1)  [Dev Only]</text>
 
-  <!-- Authentication -->
-  <rect x="200" y="284" width="500" height="28" rx="4" fill="#eff6ff" stroke="#93c5fd"/>
-  <text x="450" y="302" text-anchor="middle" font-size="11" fill="#1e40af">③ Authentication (JWT Bearer → Auth0 OIDC)</text>
+  <rect x="170" y="274" width="580" height="26" rx="4" fill="#eff6ff" stroke="#93c5fd"/>
+  <text x="460" y="291" text-anchor="middle" font-size="10" fill="#1e40af">③ Authentication — JWT Bearer → Auth0 OIDC (MapInboundClaims=false)</text>
 
-  <!-- Authorization -->
-  <rect x="200" y="318" width="500" height="28" rx="4" fill="#faf5ff" stroke="#c4b5fd"/>
-  <text x="450" y="336" text-anchor="middle" font-size="11" fill="#5b21b6">④ Authorization (scope / permissions policies)</text>
+  <rect x="170" y="306" width="580" height="26" rx="4" fill="#faf5ff" stroke="#c4b5fd"/>
+  <text x="460" y="323" text-anchor="middle" font-size="10" fill="#5b21b6">④ Authorization — HasScope() / HasPermission() (Auth0 空格分隔格式)</text>
 
   <!-- Arrow: Middleware → Endpoints -->
-  <line x1="450" y1="364" x2="450" y2="380" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="460" y1="349" x2="460" y2="362" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)"/>
 
   <!-- Endpoint Groups -->
-  <text x="200" y="398" font-size="11" font-weight="600" fill="#475569">Endpoint Routing</text>
+  <text x="170" y="382" font-size="11" font-weight="600" fill="#475569">Endpoint Routing (Minimal API)</text>
 
   <!-- Health -->
-  <rect x="180" y="406" width="170" height="60" rx="8" fill="#ffffff" stroke="#86efac" filter="url(#shadow)"/>
-  <text x="265" y="428" text-anchor="middle" font-size="12" font-weight="600" fill="#166534">Health</text>
-  <text x="265" y="446" text-anchor="middle" font-size="10" fill="#64748b">GET /api/health</text>
-  <text x="265" y="458" text-anchor="middle" font-size="9" fill="#94a3b8">Public</text>
+  <rect x="150" y="392" width="185" height="64" rx="8" fill="#ffffff" stroke="#86efac" filter="url(#shadow)"/>
+  <text x="242" y="412" text-anchor="middle" font-size="12" font-weight="600" fill="#166534">Health</text>
+  <text x="242" y="428" text-anchor="middle" font-size="10" fill="#64748b">GET /api/health</text>
+  <rect x="190" y="436" width="104" height="16" rx="3" fill="#dcfce7"/>
+  <text x="242" y="448" text-anchor="middle" font-size="9" fill="#166534">Public</text>
 
   <!-- Users -->
-  <rect x="365" y="406" width="170" height="60" rx="8" fill="#ffffff" stroke="#93c5fd" filter="url(#shadow)"/>
-  <text x="450" y="428" text-anchor="middle" font-size="12" font-weight="600" fill="#1e40af">Users</text>
-  <text x="450" y="446" text-anchor="middle" font-size="10" fill="#64748b">GET /me, GET /claims</text>
-  <text x="450" y="458" text-anchor="middle" font-size="9" fill="#94a3b8">Authenticated</text>
+  <rect x="350" y="392" width="185" height="64" rx="8" fill="#ffffff" stroke="#93c5fd" filter="url(#shadow)"/>
+  <text x="442" y="412" text-anchor="middle" font-size="12" font-weight="600" fill="#1e40af">Users</text>
+  <text x="442" y="428" text-anchor="middle" font-size="10" fill="#64748b">GET /me · GET /claims</text>
+  <rect x="390" y="436" width="104" height="16" rx="3" fill="#dbeafe"/>
+  <text x="442" y="448" text-anchor="middle" font-size="9" fill="#1e40af">Authenticated</text>
 
   <!-- Data -->
-  <rect x="550" y="406" width="190" height="60" rx="8" fill="#ffffff" stroke="#c4b5fd" filter="url(#shadow)"/>
-  <text x="645" y="428" text-anchor="middle" font-size="12" font-weight="600" fill="#5b21b6">Data</text>
-  <text x="645" y="446" text-anchor="middle" font-size="10" fill="#64748b">GET / POST / DELETE</text>
-  <text x="645" y="458" text-anchor="middle" font-size="9" fill="#94a3b8">read:data / write:data / admin</text>
+  <rect x="550" y="392" width="230" height="64" rx="8" fill="#ffffff" stroke="#c4b5fd" filter="url(#shadow)"/>
+  <text x="665" y="412" text-anchor="middle" font-size="12" font-weight="600" fill="#5b21b6">Data</text>
+  <text x="665" y="428" text-anchor="middle" font-size="10" fill="#64748b">GET · POST · DELETE</text>
+  <rect x="580" y="436" width="170" height="16" rx="3" fill="#ede9fe"/>
+  <text x="665" y="448" text-anchor="middle" font-size="9" fill="#5b21b6">read:data / write:data / admin</text>
 
-  <!-- In-Memory Store -->
-  <rect x="365" y="484" width="170" height="36" rx="6" fill="#fef9c3" stroke="#fde047" filter="url(#shadow)"/>
-  <text x="450" y="506" text-anchor="middle" font-size="11" fill="#854d0e">In-Memory Data Store</text>
+  <!-- Data Store -->
+  <rect x="400" y="474" width="200" height="36" rx="6" fill="#fef9c3" stroke="#fde047" filter="url(#shadow)"/>
+  <text x="500" y="496" text-anchor="middle" font-size="11" fill="#854d0e">ConcurrentDictionary&lt;int, DataItem&gt;</text>
+  <line x1="665" y1="456" x2="600" y2="480" stroke="#64748b" stroke-width="1" marker-end="url(#arrow)" stroke-dasharray="4,2"/>
 
-  <!-- Arrow: Data → Store -->
-  <line x1="645" y1="466" x2="540" y2="490" stroke="#64748b" stroke-width="1" marker-end="url(#arrow)" stroke-dasharray="4,2"/>
+  <!-- Extensions -->
+  <rect x="150" y="474" width="220" height="36" rx="6" fill="#f0fdf4" stroke="#86efac" filter="url(#shadow)"/>
+  <text x="260" y="496" text-anchor="middle" font-size="10" fill="#166534">ClaimsPrincipalExtensions</text>
+  <text x="260" y="506" text-anchor="middle" font-size="8" fill="#475569">HasScope() · HasPermission()</text>
+
+  <!-- Startup Validation -->
+  <rect x="630" y="474" width="150" height="36" rx="6" fill="#fef2f2" stroke="#fca5a5" filter="url(#shadow)"/>
+  <text x="705" y="494" text-anchor="middle" font-size="10" fill="#991b1b">启动配置验证</text>
+  <text x="705" y="506" text-anchor="middle" font-size="8" fill="#475569">6 项必需配置检查</text>
 
   <!-- ===== Auth0 ===== -->
-  <rect x="40" y="580" width="200" height="120" rx="12" fill="#ffffff" stroke="#f97316" stroke-width="2" filter="url(#shadow)"/>
-  <text x="140" y="604" text-anchor="middle" font-size="14" font-weight="700" fill="#ea580c">Auth0</text>
-  <text x="140" y="624" text-anchor="middle" font-size="10" fill="#64748b">Identity Provider</text>
-  <line x1="60" y1="634" x2="220" y2="634" stroke="#fdba74" stroke-width="0.5"/>
-  <text x="140" y="652" text-anchor="middle" font-size="10" fill="#475569">• OIDC Discovery</text>
-  <text x="140" y="668" text-anchor="middle" font-size="10" fill="#475569">• JWT Signing (RS256)</text>
-  <text x="140" y="684" text-anchor="middle" font-size="10" fill="#475569">• Scopes &amp; Permissions</text>
+  <rect x="30" y="590" width="200" height="130" rx="12" fill="#ffffff" stroke="#f97316" stroke-width="2" filter="url(#shadow)"/>
+  <text x="130" y="614" text-anchor="middle" font-size="14" font-weight="700" fill="#ea580c">Auth0</text>
+  <text x="130" y="632" text-anchor="middle" font-size="10" fill="#64748b">Identity Provider</text>
+  <line x1="50" y1="642" x2="210" y2="642" stroke="#fdba74" stroke-width="0.5"/>
+  <text x="130" y="660" text-anchor="middle" font-size="10" fill="#475569">• OIDC Discovery (JWKS)</text>
+  <text x="130" y="676" text-anchor="middle" font-size="10" fill="#475569">• JWT Signing (RS256)</text>
+  <text x="130" y="692" text-anchor="middle" font-size="10" fill="#475569">• Scopes: read:data, write:data</text>
+  <text x="130" y="708" text-anchor="middle" font-size="10" fill="#475569">• Permissions: admin</text>
 
   <!-- Arrow: API → Auth0 -->
-  <line x1="260" y1="316" x2="140" y2="580" stroke="#f97316" stroke-width="1.5" marker-end="url(#arrow)" stroke-dasharray="5,3"/>
-  <text x="170" y="440" font-size="9" fill="#f97316" transform="rotate(-40, 170, 440)">JWKS / OIDC Metadata</text>
+  <line x1="240" y1="330" x2="130" y2="590" stroke="#f97316" stroke-width="1.5" marker-end="url(#arrow)" stroke-dasharray="5,3"/>
+  <text x="155" y="450" font-size="9" fill="#f97316" transform="rotate(-55, 155, 450)">JWKS / OIDC Metadata</text>
 
   <!-- ===== Aspire Dashboard ===== -->
-  <rect x="660" y="580" width="200" height="120" rx="12" fill="#ffffff" stroke="#8b5cf6" stroke-width="2" filter="url(#shadow)"/>
-  <text x="760" y="604" text-anchor="middle" font-size="14" font-weight="700" fill="#7c3aed">Aspire Dashboard</text>
-  <text x="760" y="624" text-anchor="middle" font-size="10" fill="#64748b">OTLP Telemetry</text>
-  <line x1="680" y1="634" x2="840" y2="634" stroke="#c4b5fd" stroke-width="0.5"/>
-  <text x="760" y="652" text-anchor="middle" font-size="10" fill="#475569">• Traces</text>
-  <text x="760" y="668" text-anchor="middle" font-size="10" fill="#475569">• Metrics</text>
-  <text x="760" y="684" text-anchor="middle" font-size="10" fill="#475569">• Structured Logging</text>
+  <rect x="690" y="590" width="200" height="130" rx="12" fill="#ffffff" stroke="#8b5cf6" stroke-width="2" filter="url(#shadow)"/>
+  <text x="790" y="614" text-anchor="middle" font-size="14" font-weight="700" fill="#7c3aed">Aspire Dashboard</text>
+  <text x="790" y="632" text-anchor="middle" font-size="10" fill="#64748b">OTLP Telemetry</text>
+  <line x1="710" y1="642" x2="870" y2="642" stroke="#c4b5fd" stroke-width="0.5"/>
+  <text x="790" y="660" text-anchor="middle" font-size="10" fill="#475569">• Traces</text>
+  <text x="790" y="676" text-anchor="middle" font-size="10" fill="#475569">• Metrics</text>
+  <text x="790" y="692" text-anchor="middle" font-size="10" fill="#475569">• Structured Logging</text>
+  <text x="790" y="708" text-anchor="middle" font-size="10" fill="#475569">• UI: :18888 / gRPC: :18889</text>
 
   <!-- Arrow: API → Aspire -->
-  <line x1="640" y1="520" x2="760" y2="580" stroke="#8b5cf6" stroke-width="1.5" marker-end="url(#arrow)" stroke-dasharray="5,3"/>
-  <text x="730" y="546" font-size="9" fill="#8b5cf6">OTLP gRPC :18889</text>
+  <line x1="680" y1="520" x2="790" y2="590" stroke="#8b5cf6" stroke-width="1.5" marker-end="url(#arrow)" stroke-dasharray="5,3"/>
+  <text x="770" y="555" font-size="9" fill="#8b5cf6">OTLP gRPC</text>
 
-  <!-- ===== Legend ===== -->
-  <rect x="310" y="580" width="280" height="120" rx="8" fill="#f8fafc" stroke="#e2e8f0" filter="url(#shadow)"/>
-  <text x="330" y="600" font-size="11" font-weight="600" fill="#475569">Auth Flow</text>
-  <text x="330" y="618" font-size="10" fill="#64748b">1. Client → Auth0: POST /oauth/token</text>
-  <text x="330" y="634" font-size="10" fill="#64748b">2. Auth0 → Client: JWT Access Token</text>
-  <text x="330" y="650" font-size="10" fill="#64748b">3. Client → API: Authorization: Bearer &lt;token&gt;</text>
-  <text x="330" y="666" font-size="10" fill="#64748b">4. API → Auth0: Fetch JWKS (signing keys)</text>
-  <text x="330" y="682" font-size="10" fill="#64748b">5. API validates JWT → 200 / 401 / 403</text>
+  <!-- ===== Auth Flow ===== -->
+  <rect x="280" y="590" width="360" height="130" rx="8" fill="#f8fafc" stroke="#e2e8f0" filter="url(#shadow)"/>
+  <text x="300" y="610" font-size="11" font-weight="600" fill="#475569">Authentication Flow</text>
+  <text x="300" y="630" font-size="10" fill="#64748b">1. Client → Auth0: POST /oauth/token (client_credentials)</text>
+  <text x="300" y="648" font-size="10" fill="#64748b">2. Auth0 → Client: JWT { scope: "read:data write:data" }</text>
+  <text x="300" y="666" font-size="10" fill="#64748b">3. Client → API: Authorization: Bearer &lt;token&gt;</text>
+  <text x="300" y="684" font-size="10" fill="#64748b">4. API → Auth0: Fetch JWKS signing keys</text>
+  <text x="300" y="702" font-size="10" fill="#64748b">5. API validates issuer/audience/lifetime → HasScope() → 200/401/403</text>
 </svg>

@@ -1,16 +1,15 @@
-﻿using Auth0.Auth.Api.Extensions;
+using Auth0.Auth.Api.Extensions;
+using System.Collections.Concurrent;
 using System.Security.Claims;
 
 namespace Auth0.Auth.Api.Endpoints
 {
     public static class DataEndpoints
     {
-        private static readonly List<object> DataStore = new()
-        {
-            new { Id = 1, Name = "Item 1", Value = "Value 1" },
-            new { Id = 2, Name = "Item 2", Value = "Value 2" },
-            new { Id = 3, Name = "Item 3", Value = "Value 3" }
-        };
+        private static readonly ConcurrentDictionary<int, DataItem> DataStore = new(Enumerable.Range(1, 3).ToDictionary(
+            i => i, i => new DataItem(i, $"Item {i}", $"Value {i}")));
+
+        private static int _nextId = 4;
 
         public static void MapDataEndpoints(this IEndpointRouteBuilder app)
         {
@@ -19,14 +18,14 @@ namespace Auth0.Auth.Api.Endpoints
                 .WithTags("Data");
 
             // 需要 read:data scope
-            group.MapGet("/", (ClaimsPrincipal user) =>
+            group.MapGet("/", () =>
             {
                 return Results.Ok(new
                 {
                     Message = "数据读取成功",
-                    Data = DataStore,
+                    Data = DataStore.Values.OrderBy(d => d.Id),
                     Count = DataStore.Count,
-                    Timestamp = DateTime.UtcNow
+                    Timestamp = DateTimeOffset.UtcNow
                 });
             })
             .RequireAuthorization(policy =>
@@ -44,17 +43,19 @@ namespace Auth0.Auth.Api.Endpoints
             });
 
             // 需要 write:data scope
-            group.MapPost("/", (object payload, ClaimsPrincipal user) =>
+            group.MapPost("/", (DataItem payload, ClaimsPrincipal user) =>
             {
-                DataStore.Add(payload);
+                var id = Interlocked.Increment(ref _nextId) - 1;
+                var item = payload with { Id = id };
+                DataStore[id] = item;
 
-                return Results.Created($"/api/data/{DataStore.Count}", new
+                return Results.Created($"/api/data/{id}", new
                 {
                     Message = "数据写入成功",
                     CreatedBy = user.FindFirst(ClaimTypes.NameIdentifier)?.Value,
-                    NewItem = payload,
+                    NewItem = item,
                     TotalCount = DataStore.Count,
-                    Timestamp = DateTime.UtcNow
+                    Timestamp = DateTimeOffset.UtcNow
                 });
             })
             .RequireAuthorization(policy =>
@@ -82,14 +83,14 @@ namespace Auth0.Auth.Api.Endpoints
                     Message = "所有数据已清除",
                     PurgedBy = user.FindFirst(ClaimTypes.NameIdentifier)?.Value,
                     PurgedCount = count,
-                    Timestamp = DateTime.UtcNow
+                    Timestamp = DateTimeOffset.UtcNow
                 });
             })
             .RequireAuthorization(policy =>
             {
                 policy.RequireAuthenticatedUser();
                 policy.RequireAssertion(ctx =>
-                    ctx.User.HasScope("admin"));
+                    ctx.User.HasPermission("admin"));
             })
             .WithName("PurgeData")
             .AddOpenApiOperationTransformer((operation, context, ct) =>
@@ -100,4 +101,6 @@ namespace Auth0.Auth.Api.Endpoints
             });
         }
     }
+
+    public record DataItem(int Id, string Name, string Value);
 }

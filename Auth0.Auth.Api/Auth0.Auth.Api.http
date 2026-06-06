@@ -1,6 +1,45 @@
-@Auth0.Auth.Api_HostAddress = http://localhost:5149
+@Auth0.Auth.Api_HostAddress = http://localhost:5000
+@Token = <your-access-token>
 
-GET {{Auth0.Auth.Api_HostAddress}}/weatherforecast/
+### Health Check
+GET {{Auth0.Auth.Api_HostAddress}}/api/health
 Accept: application/json
+
+###
+
+### Get Current User (requires auth)
+GET {{Auth0.Auth.Api_HostAddress}}/api/users/me
+Authorization: Bearer {{Token}}
+
+###
+
+### Get User Claims (requires auth)
+GET {{Auth0.Auth.Api_HostAddress}}/api/users/claims
+Authorization: Bearer {{Token}}
+
+###
+
+### Read All Data (requires read:data scope)
+GET {{Auth0.Auth.Api_HostAddress}}/api/data/
+Authorization: Bearer {{Token}}
+
+###
+
+### Write Data (requires write:data scope)
+POST {{Auth0.Auth.Api_HostAddress}}/api/data/
+Authorization: Bearer {{Token}}
+Content-Type: application/json
+
+{
+  "id": 0,
+  "name": "New Item",
+  "value": "New Value"
+}
+
+###
+
+### Purge All Data (requires admin permission)
+DELETE {{Auth0.Auth.Api_HostAddress}}/api/data/purge
+Authorization: Bearer {{Token}}
 
 ###

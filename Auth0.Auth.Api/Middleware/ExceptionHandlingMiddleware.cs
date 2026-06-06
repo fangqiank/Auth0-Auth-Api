@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 
 namespace Auth0.Auth.Api.Middleware
 {
@@ -17,7 +17,8 @@ namespace Auth0.Auth.Api.Middleware
     /// 全局异常处理中间件
     /// </summary>
     public class ExceptionHandlingMiddleware(
-        RequestDelegate next, 
+        RequestDelegate next,
+        IHostEnvironment environment,
         ILogger<ExceptionHandlingMiddleware> logger
         )
     {
@@ -26,7 +27,6 @@ namespace Auth0.Auth.Api.Middleware
             try
             {
                 await next(context);
-
             }
             catch (Exception ex)
             {
@@ -45,7 +45,7 @@ namespace Auth0.Auth.Api.Middleware
             {
                 Status = context.Response.StatusCode,
                 Title = "An error occurred while processing your request",
-                Detail = ex.Message,
+                Detail = environment.IsDevelopment() ? ex.Message : "An internal error occurred. Please try again later.",
                 Type = ex.GetType().Name
             };
 

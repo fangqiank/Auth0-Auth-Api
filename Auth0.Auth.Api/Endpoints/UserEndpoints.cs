@@ -1,9 +1,15 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 
 namespace Auth0.Auth.Api.Endpoints
 {
     public static class UserEndpoints
     {
+        // 敏感 claims 不应返回给客户端
+        private static readonly HashSet<string> SensitiveClaimTypes =
+        [
+            "at_hash", "nonce", "sid", "aud", "iss", "iat", "exp", "azp", "sub"
+        ];
+
         public static void MapUserEndpoints(this IEndpointRouteBuilder app)
         {
             var group = app.MapGroup("/api/users")
@@ -30,7 +36,6 @@ namespace Auth0.Auth.Api.Endpoints
                     EmailVerified = user.FindFirst("email_verified")?.Value,
                     Permissions = permissions,
                     Scopes = scopes,
-                    AllClaims = user.Claims.Select(c => new { c.Type, c.Value }),
                     Timestamp = DateTimeOffset.UtcNow
                 });
             })
@@ -45,6 +50,7 @@ namespace Auth0.Auth.Api.Endpoints
             group.MapGet("/claims", (ClaimsPrincipal user) =>
             {
                 return Results.Ok(user.Claims
+                    .Where(c => !SensitiveClaimTypes.Contains(c.Type))
                     .GroupBy(c => c.Type)
                     .Select(g => new
                     {
@@ -56,7 +62,7 @@ namespace Auth0.Auth.Api.Endpoints
             .AddOpenApiOperationTransformer((operation, context, ct) =>
             {
                 operation.Summary = "获取用户 Claims";
-                operation.Description = "按 Claim 类型分组返回所有用户 Claims";
+                operation.Description = "按 Claim 类型分组返回所有用户 Claims（过滤敏感信息）";
                 return Task.CompletedTask;
             });
         }
