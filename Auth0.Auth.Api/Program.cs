@@ -7,7 +7,6 @@ using Microsoft.OpenApi;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
-using Scalar.AspNetCore;
 using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -32,7 +31,11 @@ foreach (var (key, label) in requiredConfigs)
         throw new InvalidOperationException($"{label} is not configured. Please set the '{key}' configuration value.");
 }
 
-// 原生 OpenAPI + Scalar
+var auth0ClientId = builder.Configuration["Authentication:ClientId"]!;
+var auth0ClientSecret = builder.Configuration["Authentication:ClientSecret"]!;
+var auth0Audience = builder.Configuration["Authentication:Audience"]!;
+
+// 原生 OpenAPI
 builder.Services.AddOpenApi(options =>
 {
     options.AddDocumentTransformer((document, context, ct) =>
@@ -87,6 +90,14 @@ builder.Services.AddOpenApi(options =>
                     }
                 }
             };
+
+            // 全局安全要求：让 Swagger UI 自动附带 token
+            var requirement = new OpenApiSecurityRequirement
+            {
+                [new OpenApiSecuritySchemeReference("Auth0", document)] = []
+            };
+            document.Security ??= [];
+            document.Security.Add(requirement);
         }
 
         return Task.CompletedTask;
@@ -150,11 +161,22 @@ var app = builder.Build();
 
 app.UseExceptionHandling();
 
-// 开发环境：OpenAPI 文档 + Scalar UI
+// 开发环境：OpenAPI 文档 + Swagger UI
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-    app.MapScalarApiReference();
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/openapi/v1.json", "Auth0 Auth API v1");
+        options.OAuthClientId(auth0ClientId);
+        options.OAuthClientSecret(auth0ClientSecret);
+        options.OAuthAppName("Auth0 Auth API");
+        options.OAuthUsePkce();
+        options.OAuthAdditionalQueryStringParams(new Dictionary<string, string>
+        {
+            ["audience"] = auth0Audience
+        });
+    });
 }
 
 app.UseAuthentication();
@@ -164,7 +186,7 @@ app.MapHealthEndpoints();
 app.MapUserEndpoints();
 app.MapDataEndpoints();
 
-app.MapGet("/", () => Results.Redirect("/scalar/v1"))
+app.MapGet("/", () => Results.Redirect("/swagger"))
     .ExcludeFromDescription();
 
 app.Run();

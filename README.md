@@ -11,7 +11,7 @@ A .NET 10 Minimal API demonstrating Auth0 JWT authentication with scope/permissi
 |------|------|
 | .NET 10 Minimal API | Web 框架 |
 | JWT Bearer (Auth0) | 认证与授权 |
-| Scalar | API 文档 UI |
+| Swagger UI | API 文档与交互测试 |
 | OpenTelemetry | 分布式追踪与指标 |
 | Aspire Dashboard | 遥测可视化 |
 | Docker / Docker Compose | 容器化部署 |
@@ -77,7 +77,7 @@ docker-compose up --build
 | 服务 | 地址 |
 |------|------|
 | API | http://localhost:5000 |
-| Scalar UI | http://localhost:5000/scalar/v1 |
+| Swagger UI | http://localhost:5000/swagger |
 | Aspire Dashboard | http://localhost:18888 |
 
 ## API Endpoints
@@ -91,9 +91,18 @@ docker-compose up --build
 | `POST` | `/api/data/` | JWT | `write:data` scope | 写入新数据 |
 | `DELETE` | `/api/data/purge` | JWT | `admin` permission | 清除所有数据 |
 
-## Example
+## Testing with Swagger UI
 
-获取 token（使用 Auth0 Test Application 的凭据）：
+### 方式 1：Auth0 OAuth2（用户登录）
+
+1. 打开 http://localhost:5000/swagger
+2. 点击 **Authorize** → 在 Auth0 区域登录
+3. 自动获取 token（scope: `openid profile email`）
+4. 可访问 `/api/users/*`
+
+### 方式 2：Bearer Token（推荐，能测所有端点）
+
+先获取 token：
 
 ```bash
 curl -X POST https://your-tenant.auth0.com/oauth/token \
@@ -106,9 +115,15 @@ curl -X POST https://your-tenant.auth0.com/oauth/token \
   }'
 ```
 
-访问受保护的端点：
+然后在 Swagger UI 中：
+1. 点击 **Authorize**
+2. 在 **Bearer** 区域粘贴 `access_token`
+3. 可访问所有端点（scope: `read:data write:data`）
+
+## Example
 
 ```bash
+# 获取 token 后访问受保护端点
 curl http://localhost:5000/api/data \
   -H "Authorization: Bearer <access_token>"
 ```
